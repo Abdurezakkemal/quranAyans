@@ -62,7 +62,6 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
     getNewAyah();
   }
 
-  // get new ayah from api
   void getNewAyah() async {
     setState(() {
       isLoading = true;
@@ -98,10 +97,8 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
           padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Main Content
               Expanded(child: buildContent()),
 
-              // Control Buttons
               SizedBox(height: 16),
               buildControlButtons(),
             ],
@@ -111,7 +108,6 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
     );
   }
 
-  // build button
   Widget buildControlButtons() {
     return Container(
       width: double.infinity,
@@ -135,7 +131,6 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
     );
   }
 
-  // build main content
   Widget buildContent() {
     if (isLoading) {
       return buildLoadingWidget();
@@ -152,35 +147,31 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
     return Center(child: Text('No data available'));
   }
 
-  // show loading
   Widget buildLoadingWidget() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.black12, width: 1),
-            ),
-            child: Column(
-              children: [
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                  strokeWidth: 2,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Loading verse...',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                    fontWeight: FontWeight.normal,
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    strokeWidth: 2,
                   ),
-                ),
-              ],
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading verse...',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -188,172 +179,168 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
     );
   }
 
-  // show error
   Widget buildErrorWidget() {
     return Center(
-      child: Container(
+      child: Card(
         margin: EdgeInsets.all(16),
-        padding: EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.black12, width: 1),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Card(
                 color: Colors.black12,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(Icons.error_outline, color: Colors.black, size: 24),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Error',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Unable to load verse',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.black54),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: getNewAyah,
-                icon: Icon(Icons.refresh_rounded),
-                label: Text('Try Again'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.error_outline,
+                    color: Colors.black,
+                    size: 24,
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              Text(
+                'Error',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Unable to load verse',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: getNewAyah,
+                  icon: Icon(Icons.refresh_rounded),
+                  label: Text('Try Again'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // show ayah
   Widget buildAyahWidget() {
     return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.black12, width: 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Surah Information Header
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    currentAyah!.surah.name,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+      child: Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Card(
+                  color: Colors.black,
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          '${currentAyah!.surah.name} - ${currentAyah!.numberInSurah}',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          currentAyah!.numberInSurah.toString(),
+                          style: TextStyle(fontSize: 14, color: Colors.white70),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'آية ' + currentAyah!.numberInSurah.toString(),
-                    style: TextStyle(fontSize: 14, color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 24),
-
-            // Arabic Text
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.black12),
-              ),
-              child: Text(
-                currentAyah!.text,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 24,
-                  height: 2.0,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
+              SizedBox(height: 24),
 
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.black12),
+              Card(
+                color: Colors.grey[50],
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    currentAyah!.text,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 24,
+                      height: 2.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+              SizedBox(height: 16),
+
+              Card(
+                color: Colors.grey[100],
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
                     children: [
-                      buildAdditionalInfo('Juz', currentAyah!.juz.toString()),
-                      buildAdditionalInfo('Page', currentAyah!.page.toString()),
-                      buildAdditionalInfo(
-                        'Verse',
-                        currentAyah!.number.toString(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          buildAdditionalInfo(
+                            'Juz',
+                            currentAyah!.juz.toString(),
+                          ),
+                          buildAdditionalInfo(
+                            'Page',
+                            currentAyah!.page.toString(),
+                          ),
+                          buildAdditionalInfo(
+                            'Verse',
+                            currentAyah!.number.toString(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      Card(
+                        color: Colors.black12,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            currentAyah!.surah.revelationType + ' Period',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 12),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black12,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      currentAyah!.surah.revelationType + ' Period',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
