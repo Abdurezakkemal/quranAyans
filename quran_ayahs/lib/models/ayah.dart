@@ -60,18 +60,12 @@ class Ayah {
 
 class Edition {
   final String identifier;
-  final String language;
-  final String name;
-  final String englishName;
   final String format;
   final String type;
   final String direction;
 
   Edition({
     required this.identifier,
-    required this.language,
-    required this.name,
-    required this.englishName,
     required this.format,
     required this.type,
     required this.direction,
@@ -80,9 +74,6 @@ class Edition {
   factory Edition.fromJson(Map<String, dynamic> json) {
     return Edition(
       identifier: json['identifier'],
-      language: json['language'],
-      name: json['name'],
-      englishName: json['englishName'],
       format: json['format'],
       type: json['type'],
       direction: json['direction'],
@@ -92,9 +83,6 @@ class Edition {
   Map<String, dynamic> toJson() {
     return {
       'identifier': identifier,
-      'language': language,
-      'name': name,
-      'englishName': englishName,
       'format': format,
       'type': type,
       'direction': direction,
@@ -105,16 +93,12 @@ class Edition {
 class Surah {
   final int number;
   final String name;
-  final String englishName;
-  final String englishNameTranslation;
   final int numberOfAyahs;
   final String revelationType;
 
   Surah({
     required this.number,
     required this.name,
-    required this.englishName,
-    required this.englishNameTranslation,
     required this.numberOfAyahs,
     required this.revelationType,
   });
@@ -123,8 +107,6 @@ class Surah {
     return Surah(
       number: json['number'],
       name: json['name'],
-      englishName: json['englishName'],
-      englishNameTranslation: json['englishNameTranslation'],
       numberOfAyahs: json['numberOfAyahs'],
       revelationType: json['revelationType'],
     );
@@ -134,8 +116,6 @@ class Surah {
     return {
       'number': number,
       'name': name,
-      'englishName': englishName,
-      'englishNameTranslation': englishNameTranslation,
       'numberOfAyahs': numberOfAyahs,
       'revelationType': revelationType,
     };

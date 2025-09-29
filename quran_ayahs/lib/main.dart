@@ -3,189 +3,244 @@ import 'services/quran_service.dart';
 import 'models/ayah.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quran Ayahs',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
+          seedColor: Colors.black,
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        fontFamily: 'Arial',
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          color: Colors.white,
+        ),
       ),
-      home: const QuranAyahsPage(),
+      home: QuranAyahsPage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class QuranAyahsPage extends StatefulWidget {
-  const QuranAyahsPage({super.key});
+  QuranAyahsPage({super.key});
 
   @override
   State<QuranAyahsPage> createState() => _QuranAyahsPageState();
 }
 
 class _QuranAyahsPageState extends State<QuranAyahsPage> {
-  final QuranService _quranService = QuranService();
+  QuranService quranService = QuranService();
 
-  Ayah? _currentAyah;
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool _showTranslation = false;
+  Ayah? currentAyah;
+  bool isLoading = false;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _fetchRandomAyah();
+    getNewAyah();
   }
 
-  Future<void> _fetchRandomAyah() async {
+  // get new ayah from api
+  void getNewAyah() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      isLoading = true;
+      errorMessage = '';
     });
 
     try {
-      final response = _showTranslation
-          ? await _quranService.getRandomAyahWithTranslation()
-          : await _quranService.getRandomAyah();
-
+      ApiResponse response = await quranService.getRandomAyah();
       setState(() {
-        _currentAyah = response.data;
-        _isLoading = false;
+        currentAyah = response.data;
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
-        _isLoading = false;
+        errorMessage = 'Failed to load verse';
+        isLoading = false;
       });
     }
-  }
-
-  void _toggleTranslation() {
-    setState(() {
-      _showTranslation = !_showTranslation;
-    });
-    _fetchRandomAyah();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'Quran Ayahs',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: Colors.teal,
-        elevation: 8,
-        centerTitle: true,
+        title: Text('Quran Ayahs'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
+        shadowColor: Colors.black12,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Main Content
+              Expanded(child: buildContent()),
+
+              // Control Buttons
+              SizedBox(height: 16),
+              buildControlButtons(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // build button
+  Widget buildControlButtons() {
+    return Container(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: isLoading ? null : getNewAyah,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Header Card
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    colors: [Colors.teal.shade400, Colors.teal.shade600],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.book, color: Colors.white, size: 40),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Random Quran Verse',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _showTranslation
-                          ? 'With English Translation'
-                          : 'Arabic Text',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            Icon(Icons.refresh_rounded),
+            SizedBox(width: 8),
+            Text('Get New Verse'),
+          ],
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.black,
+          side: BorderSide(color: Colors.black, width: 1),
+          padding: EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+      ),
+    );
+  }
+
+  // build main content
+  Widget buildContent() {
+    if (isLoading) {
+      return buildLoadingWidget();
+    }
+
+    if (errorMessage != null && errorMessage!.isNotEmpty) {
+      return buildErrorWidget();
+    }
+
+    if (currentAyah != null) {
+      return buildAyahWidget();
+    }
+
+    return Center(child: Text('No data available'));
+  }
+
+  // show loading
+  Widget buildLoadingWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.black12, width: 1),
             ),
-
-            const SizedBox(height: 20),
-
-            // Main Content
-            Expanded(child: _buildContent()),
-
-            // Control Buttons
-            const SizedBox(height: 20),
-            Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _toggleTranslation,
-                    icon: Icon(
-                      _showTranslation
-                          ? Icons.translate
-                          : Icons.translate_outlined,
-                    ),
-                    label: Text(
-                      _showTranslation ? 'Arabic Only' : 'With Translation',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                  strokeWidth: 2,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _fetchRandomAyah,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('New Ayah'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                SizedBox(height: 16),
+                Text(
+                  'Loading verse...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.normal,
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // show error
+  Widget buildErrorWidget() {
+    return Center(
+      child: Container(
+        margin: EdgeInsets.all(16),
+        padding: EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black12, width: 1),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Icon(Icons.error_outline, color: Colors.black, size: 24),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Error',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Unable to load verse',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: getNewAyah,
+                icon: Icon(Icons.refresh_rounded),
+                label: Text('Try Again'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -193,197 +248,136 @@ class _QuranAyahsPageState extends State<QuranAyahsPage> {
     );
   }
 
-  Widget _buildContent() {
-    if (_isLoading) {
-      return _buildLoadingWidget();
-    }
-
-    if (_errorMessage != null) {
-      return _buildErrorWidget();
-    }
-
-    if (_currentAyah != null) {
-      return _buildAyahWidget();
-    }
-
-    return const Center(child: Text('No data available'));
-  }
-
-  Widget _buildLoadingWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
-            strokeWidth: 3,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Fetching Ayah...',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget() {
-    return Center(
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
-              const Text(
-                'Oops! Something went wrong',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _fetchRandomAyah,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAyahWidget() {
+  // show ayah
+  Widget buildAyahWidget() {
     return SingleChildScrollView(
-      child: Card(
-        elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Surah Information
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      _currentAyah!.surah.englishName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.teal,
-                      ),
-                    ),
-                    Text(
-                      '${_currentAyah!.surah.englishNameTranslation} - Verse ${_currentAyah!.numberInSurah}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.teal.shade700,
-                      ),
-                    ),
-                  ],
-                ),
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black12, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Surah Information Header
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(4),
               ),
-
-              const SizedBox(height: 20),
-
-              // Arabic Text
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Text(
-                  _currentAyah!.text,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    height: 2.0,
-                    fontWeight: FontWeight.w500,
+              child: Column(
+                children: [
+                  Text(
+                    currentAyah!.surah.name,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
+                  SizedBox(height: 4),
+                  Text(
+                    'آية ' + currentAyah!.numberInSurah.toString(),
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 24),
+
+            // Arabic Text
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: Text(
+                currentAyah!.text,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 24,
+                  height: 2.0,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
                 ),
               ),
+            ),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-              // Additional Information
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildInfoItem('Juz', '${_currentAyah!.juz}'),
-                        _buildInfoItem('Page', '${_currentAyah!.page}'),
-                        _buildInfoItem('Ayah #', '${_currentAyah!.number}'),
-                      ],
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildAdditionalInfo('Juz', currentAyah!.juz.toString()),
+                      buildAdditionalInfo('Page', currentAyah!.page.toString()),
+                      buildAdditionalInfo(
+                        'Verse',
+                        currentAyah!.number.toString(),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Revelation: ${_currentAyah!.surah.revelationType}',
+                    child: Text(
+                      currentAyah!.surah.revelationType + ' Period',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoItem(String label, String value) {
+  Widget buildAdditionalInfo(String label, String value) {
     return Column(
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.blue,
+            color: Colors.black,
           ),
         ),
+        SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: Colors.blue.shade700),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.normal,
+            color: Colors.black54,
+          ),
         ),
       ],
     );
