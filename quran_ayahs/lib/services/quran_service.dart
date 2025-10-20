@@ -6,7 +6,7 @@ import '../models/ayah.dart';
 class QuranService {
   String baseUrl = 'http://api.alquran.cloud/v1';
   
-  // get random ayah
+  
   Future<ApiResponse> getRandomAyah() async {
     Random random = Random();
     int randomNumber = random.nextInt(6236) + 1;
@@ -24,7 +24,7 @@ class QuranService {
     }
   }
 
-  // get ayah by number
+  
   Future<ApiResponse> getAyahByNumber(int number) async {
     String url = baseUrl + '/ayah/' + number.toString();
     
@@ -39,7 +39,7 @@ class QuranService {
     }
   }
 
-  // get ayah by surah and verse
+  
   Future<ApiResponse> getAyahBySurahAndVerse(int surahNumber, int verseNumber) async {
     String url = baseUrl + '/ayah/' + surahNumber.toString() + ':' + verseNumber.toString();
     
